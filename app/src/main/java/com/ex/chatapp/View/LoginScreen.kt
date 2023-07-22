@@ -211,7 +211,7 @@ Box(modifier = Modifier){
                 TextButton(
                     onClick = {
 
-                        navController.navigate("register_screen")
+                        navController.navigate("RegisterScreen")
 
                     },
                     shape = RoundedCornerShape(8.dp),

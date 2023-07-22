@@ -1,5 +1,7 @@
 package com.ex.chatapp
 
+import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -24,9 +27,18 @@ import com.ex.chatapp.View.MainScreen
 import com.ex.chatapp.View.RegisterScreen
 import com.ex.chatapp.ui.theme.ChatAppTheme
 import com.ex.chatapp.ui.theme.loginText
+import com.google.firebase.FirebaseApp
+
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        FirebaseApp.initializeApp(this)
+    }
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        FirebaseApp.initializeApp(applicationContext)
         super.onCreate(savedInstanceState)
         setContent {
             ChatAppTheme {
@@ -59,6 +71,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 
 
 
