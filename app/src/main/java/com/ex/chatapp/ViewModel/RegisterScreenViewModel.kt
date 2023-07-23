@@ -6,8 +6,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.ex.chatapp.User
+import com.ex.chatapp.ui.theme.nickClaimedText
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
 
@@ -24,14 +27,46 @@ class RegisterScreenViewModel:ViewModel() {
 
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val database= FirebaseFirestore.getInstance()
+    private val database= FirebaseDatabase.getInstance().reference
 
     fun register(email: String, password: String, nick: String) {
 
         _isError.value=""
         _isLoading.value = true
 
-        database.collection("Users").whereEqualTo("nick",nick).addSnapshotListener{ value, error ->
+        database.child("users").child(nick).get().addOnSuccessListener {
+            if(it.exists()){
+                _isLoading.value=false
+                _isError.value= nickClaimedText
+            }else{
+
+                val user=User(email = email)
+                auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
+                    
+                    database.child("users").child(nick).setValue(user).addOnSuccessListener {
+                        _isLoading.value=false
+                        _isSuccess.value=true
+
+                    }.addOnFailureListener {
+                        _isLoading.value=false
+                        _isError.value=it.localizedMessage
+                    }
+
+                }.addOnFailureListener {
+                    _isLoading.value=false
+                    _isError.value=it.localizedMessage
+                }
+
+
+            }
+        }.addOnFailureListener {
+            _isLoading.value=false
+            _isError.value=it.localizedMessage
+        }
+
+
+           /*
+            .addSnapshotListener{ value, error ->
 
 
             if(error==null){
@@ -75,7 +110,7 @@ class RegisterScreenViewModel:ViewModel() {
                 _isError.value=error.localizedMessage
                 Log.e("Error",error.localizedMessage!!)
             }
-        }
+        }*/
 
 
     }
