@@ -1,4 +1,6 @@
 package com.ex.chatapp.ViewModel
 
-class MainScreenViewModel {
+import androidx.lifecycle.ViewModel
+
+class MainScreenViewModel:ViewModel() {
 }

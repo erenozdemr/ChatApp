@@ -1,17 +1,12 @@
 package com.ex.chatapp.ViewModel
 
-import android.content.Context
-import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ex.chatapp.User
+import com.ex.chatapp.Model.User
 import com.ex.chatapp.ui.theme.nickClaimedText
-import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.FirebaseFirestore
 
 
 class RegisterScreenViewModel:ViewModel() {
@@ -40,7 +35,7 @@ class RegisterScreenViewModel:ViewModel() {
                 _isError.value= nickClaimedText
             }else{
 
-                val user=User(email = email)
+                val user= User(email = email)
                 auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
 
                     database.child("users").child(nick).setValue(user).addOnSuccessListener {

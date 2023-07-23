@@ -1,4 +1,4 @@
-package com.ex.chatapp
+package com.ex.chatapp.Model
 
 data class User(
     var email:String,
