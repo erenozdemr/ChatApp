@@ -42,7 +42,7 @@ class RegisterScreenViewModel:ViewModel() {
 
                 val user=User(email = email)
                 auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
-                    
+
                     database.child("users").child(nick).setValue(user).addOnSuccessListener {
                         _isLoading.value=false
                         _isSuccess.value=true

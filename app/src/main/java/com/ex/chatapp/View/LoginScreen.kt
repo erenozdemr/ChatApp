@@ -1,5 +1,6 @@
 package com.ex.chatapp.View
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +32,7 @@ import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,19 +56,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.ex.chatapp.R
+import com.ex.chatapp.ViewModel.LoginScreenViewModel
 import java.util.Locale
 
 @Composable
-fun LoginScreen(navController: NavController) {
-
-   LoginScreenGenerate(navController = navController)
+fun LoginScreen(navController: NavController,viewModel: LoginScreenViewModel=remember{ LoginScreenViewModel() }) {
+    viewModel.directLogin()
+   LoginScreenGenerate(navController = navController, viewModel = viewModel)
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreenGenerate(navController:NavController) {
+fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewModel) {
 
+    val isLoading by viewModel.isLoading.observeAsState(false)
+    val isSuccess by viewModel.isSuccess.observeAsState("")
+    val isError by viewModel.isError.observeAsState("")
+    var previousError by remember{ mutableStateOf("") }
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -73,94 +81,94 @@ fun LoginScreenGenerate(navController:NavController) {
     var emailEmpty by remember { mutableStateOf(false) }
     var passwordEmpty by remember { mutableStateOf(false) }
 
-Box(modifier = Modifier){
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-
-            .alpha(0.9f)
-            .background(LinearGradient())
-            .clip(
-                CutCornerShape(
-                    topStart = 8.dp,
-                    topEnd = 16.dp,
-                    bottomStart = 16.dp, bottomEnd = 8.dp
-                )
-            )
-
-    ) {
-
-
-
-
+    if (isSuccess.isNotBlank()){
+        navController.navigate("MainScreen/$isSuccess"){
+            popUpTo("LoginScreen") { inclusive = true }
+            launchSingleTop = true
+        }
     }
-    Box(modifier = Modifier, contentAlignment = Alignment.Center){
-        Card(modifier = Modifier.padding(top = 150.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xF44336))) {
-            Column(
+
+    Box(modifier = Modifier){
+        if (isLoading) {
+            previousError=""
+            Box(
                 modifier = Modifier
-
-
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
             ) {
-
-
-                Text(
-                    text = "Giriş",
-                    fontSize = 40.sp,
+                CircularProgressIndicator(
                     modifier = Modifier
-                        .padding(5.dp)
-                        .padding(vertical = 5.dp)
-                        .fillMaxWidth()
+                        .size(60.dp)
+                        .padding(16.dp),
+                    color = Color.White
+                )
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+
+                .alpha(0.9f)
+                .background(LinearGradient())
+                .clip(
+                    CutCornerShape(
+                        topStart = 8.dp,
+                        topEnd = 16.dp,
+                        bottomStart = 16.dp, bottomEnd = 8.dp
+                    )
                 )
 
+        ) {
+            if (isError.isNotBlank()&&previousError.isBlank()) {
+                Toast.makeText(LocalContext.current, isError, Toast.LENGTH_LONG).show()
+                previousError=isError
+            }
 
 
-                OutlinedTextField(value = email,
-                    onValueChange = {
-                        if (it.isEmpty()) {
-                            email = it
-                        } else if (!it[it.length - 1].isWhitespace()) {
-                            email = it.lowercase(Locale.ENGLISH)
-                        }
-                    },
-                    label = { Text(text = "E-posta") },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        containerColor = Color.LightGray
 
-                    ),
+        }
+        Box(modifier = Modifier, contentAlignment = Alignment.Center){
+            Card(modifier = Modifier.padding(top = 150.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xF44336))) {
+                Column(
+                    modifier = Modifier
 
-                    supportingText = {
-                        if (emailEmpty) {
-                            Text(
-                                text = "Doldurulması zorunlu alan",
-                                style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp)
-                            )
-                        }
-                    }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
 
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = password,
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+
+                    Text(
+                        text = "Giriş",
+                        fontSize = 40.sp,
+                        modifier = Modifier
+                            .padding(5.dp)
+                            .padding(vertical = 5.dp)
+                            .fillMaxWidth()
+                    )
+
+
+
+                    OutlinedTextField(value = email,
                         onValueChange = {
                             if (it.isEmpty()) {
-                                password = it
+                                email = it
                             } else if (!it[it.length - 1].isWhitespace()) {
-                                password = it
+                                email = it.lowercase(Locale.ENGLISH)
                             }
-                        },  colors = TextFieldDefaults.outlinedTextFieldColors(
-                            containerColor = Color.LightGray),
-                        label = { Text(text = "Şifre") },
-                        visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-                        modifier = Modifier.fillMaxWidth(), maxLines = 1,
-                        isError = passwordEmpty,
+                        },
+                        label = { Text(text = "E-posta") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            containerColor = Color.LightGray
+
+                        ),
+
                         supportingText = {
-                            if (passwordEmpty) {
+                            if (emailEmpty) {
                                 Text(
                                     text = "Doldurulması zorunlu alan",
                                     style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp)
@@ -168,72 +176,98 @@ Box(modifier = Modifier){
                             }
                         }
                     )
-                    IconButton(
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = password,
+                            onValueChange = {
+                                if (it.isEmpty()) {
+                                    password = it
+                                } else if (!it[it.length - 1].isWhitespace()) {
+                                    password = it
+                                }
+                            },  colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = Color.LightGray),
+                            label = { Text(text = "Şifre") },
+                            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+                            modifier = Modifier.fillMaxWidth(), maxLines = 1,
+                            isError = passwordEmpty,
+                            supportingText = {
+                                if (passwordEmpty) {
+                                    Text(
+                                        text = "Doldurulması zorunlu alan",
+                                        style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp)
+                                    )
+                                }
+                            }
+                        )
+                        IconButton(
+                            onClick = {
+                                passwordVisibility = !passwordVisibility
+                            },
+
+                            modifier = Modifier
+                                .size(35.dp)
+                                .align(Alignment.CenterEnd)
+                                .padding(end = 10.dp, top = 5.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = if (passwordVisibility) R.drawable.show else R.drawable.eye),
+                                contentDescription = if (passwordVisibility) "Şifreyi Gizle" else "Şifreyi Göster",
+                                tint = Color.Gray, modifier = Modifier.size(60.dp)
+                            )
+                        }
+
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(modifier = Modifier.fillMaxWidth(0.6f),
+                        colors = ButtonDefaults.buttonColors(
+                        Color(0xFF2C519B)
+                        )
+                    ,onClick = {
+                        emailEmpty=false
+                        passwordEmpty=false
+
+                        if(email.isNullOrEmpty()){
+                            emailEmpty=true
+                        }
+                        if(password.isNullOrEmpty()){
+                            passwordEmpty=true
+                        }
+                        if(!emailEmpty&&!passwordEmpty){
+                           viewModel.Login(email, password = password)
+                        }
+                    }) {
+                        Text(text = "Giriş")
+                    }
+                    Spacer(modifier = Modifier.height(150.dp))
+                    TextButton(
                         onClick = {
-                            passwordVisibility = !passwordVisibility
+
+                            navController.navigate("RegisterScreen")
+
                         },
+                        shape = RoundedCornerShape(8.dp),
 
                         modifier = Modifier
-                            .size(35.dp)
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 10.dp, top = 5.dp)
+                            .fillMaxWidth()
+                            .padding(top = 10.dp, start = 50.dp, end = 50.dp)
                     ) {
-                        Icon(
-                            painter = painterResource(id = if (passwordVisibility) R.drawable.show else R.drawable.eye),
-                            contentDescription = if (passwordVisibility) "Şifreyi Gizle" else "Şifreyi Göster",
-                            tint = Color.Gray, modifier = Modifier.size(60.dp)
-                        )
+                        Row() {
+                            Text(text = "Hesabın yok mu?",fontSize = 17.sp, color = Color.DarkGray)
+                            Text(text = " kayıt Ol", color = Color.Black, fontSize = 17.sp)
+
+                        }
                     }
+
+
 
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(modifier = Modifier.fillMaxWidth(0.6f),
-                    colors = ButtonDefaults.buttonColors(
-                    Color(0xFF2C519B)
-                    )
-                ,onClick = {
-                    emailEmpty=false
-                    passwordEmpty=false
-
-                    if(email.isNullOrEmpty()){
-                        emailEmpty=true
-                    }
-                    if(password.isNullOrEmpty()){
-                        passwordEmpty=true
-                    }
-                    if(!emailEmpty&&!passwordEmpty){
-                       // viewModel.Login(email, password = password, navController = navController)
-                    }
-                }) {
-                    Text(text = "Giriş")
-                }
-                Spacer(modifier = Modifier.height(150.dp))
-                TextButton(
-                    onClick = {
-
-                        navController.navigate("RegisterScreen")
-
-                    },
-                    shape = RoundedCornerShape(8.dp),
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, start = 50.dp, end = 50.dp)
-                ) {
-                    Row() {
-                        Text(text = "Hesabın yok mu?",fontSize = 17.sp, color = Color.DarkGray)
-                        Text(text = " kayıt Ol", color = Color.Black, fontSize = 17.sp)
-
-                    }
-                }
-
-
-
             }
         }
-    }
 
-}
+    }
 
 }
 
@@ -253,5 +287,5 @@ fun LinearGradient() :Brush{
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun LoginScreenPreview() {
-    LoginScreenGenerate(navController = NavController(LocalContext.current))
+    LoginScreenGenerate(navController = NavController(LocalContext.current), LoginScreenViewModel())
 }

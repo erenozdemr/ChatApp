@@ -18,9 +18,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ex.chatapp.View.ChatScreen
 import com.ex.chatapp.View.LoginScreen
 import com.ex.chatapp.View.MainScreen
@@ -56,8 +58,13 @@ class MainActivity : ComponentActivity() {
 
                     }
 
-                    composable(route = "MainScreen"){
-                        MainScreen(navController = navController)
+                    composable(route = "MainScreen/{nick}", arguments = listOf(
+                        navArgument("nick"){
+                            type= NavType.StringType
+                        }
+                    )){
+                        val nick=it.arguments?.getString("nick","noNick")
+                        MainScreen(navController = navController, nick = nick!!)
 
                     }
 
