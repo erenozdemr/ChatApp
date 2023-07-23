@@ -68,8 +68,18 @@ class MainActivity : ComponentActivity() {
 
                     }
 
-                    composable(route = "ChatScreen"){
-                        ChatScreen(navController = navController)
+                    composable(route = "ChatScreen/{userNick}/{otherUserNick}", arguments = listOf(
+                        navArgument("userNick"){
+                            type= NavType.StringType
+                        },
+                        navArgument("otherUserNick"){
+                            type= NavType.StringType
+                        }
+                    )){
+                        val userNick=it.arguments?.getString("userNick","noNick")
+                        val otherUserNick=it.arguments?.getString("otherUserNick","noNick")
+
+                        ChatScreen(navController = navController, userNick = userNick!!,otherUserNick=otherUserNick!!)
 
                     }
                 }
