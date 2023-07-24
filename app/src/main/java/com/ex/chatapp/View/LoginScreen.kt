@@ -1,6 +1,7 @@
 package com.ex.chatapp.View
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -114,6 +115,7 @@ Box(modifier = Modifier){
                         .padding(5.dp)
                         .padding(vertical = 5.dp)
                         .fillMaxWidth()
+
                 )
 
 
@@ -241,7 +243,7 @@ Box(modifier = Modifier){
 @Composable
 fun LinearGradient() :Brush{
     val gradient = Brush.verticalGradient(
-        0.05f to Color(0xFFDDD8D8),
+        0.05f to Color(0xFF211D5C),
         0.2f to Color(0xFF211D5C),
         0.99f to Color(0xFF43C6AC),
         startY = 0.0f,
