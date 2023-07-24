@@ -65,6 +65,14 @@ private fun ScreenRegisterGenerate(navController: NavController, viewModel: Regi
     var nickEmpty by remember { mutableStateOf(false) }
     var passwordsEqual by remember { mutableStateOf(true) }
 
+
+    if (isSuccess){
+        navController.navigate("LoginScreen"){
+            popUpTo("RegisterScreen") { inclusive = true }
+            launchSingleTop = true
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         Box(
@@ -88,12 +96,7 @@ private fun ScreenRegisterGenerate(navController: NavController, viewModel: Regi
             Toast.makeText(LocalContext.current, isError, Toast.LENGTH_LONG).show()
             previousError=isError
         }
-        if (isSuccess){
-            navController.navigate("LoginScreen"){
-                popUpTo("RegisterScreen") { inclusive = true }
-                launchSingleTop = true
-            }
-        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
