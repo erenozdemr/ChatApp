@@ -65,15 +65,21 @@ MainScreenGenerate(nick = nick, navController = navController,viewModel=viewMode
 fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainScreenViewModel){
     val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val isError by viewModel.isError.observeAsState(initial = "")
-    val goWithNick by viewModel.goWithNick.observeAsState(initial = "")
     val goWithID by viewModel.goWithID.observeAsState(initial = "")
     val chatList by viewModel.chatList.observeAsState(listOf())
     val searchItems by viewModel.searchList.observeAsState(initial = listOf())
     var prevError by remember { mutableStateOf("") }
+    var otherNick by remember{ mutableStateOf("") }
 
 
     var search by remember {
         mutableStateOf("")
+    }
+
+    if(goWithID.isNotBlank()&&otherNick.isNotBlank()){
+        navController.navigate("ChatScreen/$nick/$otherNick/$goWithID"){
+            launchSingleTop = true
+        }
     }
 
     Box() {
@@ -123,7 +129,7 @@ fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainS
                     , textStyle = TextStyle(fontSize = 13.sp),
                 onValueChange = {
                     search = it.lowercase(Locale.UK)
-                    viewModel.searchNick(search)
+                    viewModel.searchNick(search,nick)
                 },
                 label = { Text("Bir hesap ara", fontSize = 10.sp) }
             )
@@ -132,7 +138,10 @@ fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainS
 
                 ) {
                     items(searchItems) { item ->
-                        SearchItem(item = item, navController = navController, userNick = nick ?: "nick couldn't found")
+                        SearchItem(item = item, navController = navController, userNick = nick ?: "nick couldn't found"){
+                            otherNick=it
+                            viewModel.goWithNick(nick, otheruserNick = otherNick)
+                        }
                     }
                 }
             }
@@ -145,13 +154,16 @@ fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainS
 
 }
 @Composable
-fun SearchItem(item: SimpleUser, navController: NavController, userNick: String) {
+fun SearchItem(item: SimpleUser, navController: NavController, userNick: String,onClick:(String)->Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 120.dp, top = 8.dp, bottom = 8.dp, end = 120.dp)
             .border(1.dp, Color.Black, RectangleShape)
             .background(Color.LightGray)
+            .clickable {
+                onClick(item.nick)
+            }
     ) {
         Text(
             item.nick,
