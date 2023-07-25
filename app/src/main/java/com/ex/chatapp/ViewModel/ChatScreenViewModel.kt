@@ -16,11 +16,13 @@ class ChatScreenViewModel:ViewModel() {
     private val _isLoading = MutableLiveData(false)
     private val _messagleList = MutableLiveData(listOf<Message>())
     private val _isSuccess = MutableLiveData("")
+    private val _profileUrl = MutableLiveData("no")
     private val _isError = MutableLiveData("")
 
     val isLoading: LiveData<Boolean> = _isLoading
     val messageList: LiveData<List<Message>> = _messagleList
     val isSuccess: LiveData<String> = _isSuccess
+    val profileUrl: LiveData<String> = _profileUrl
     val isError: LiveData<String> = _isError
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -53,6 +55,11 @@ class ChatScreenViewModel:ViewModel() {
 
         })
     }
+    fun getPhotoOfOther(otherUserNick:String){
+        database.child("users").child(otherUserNick).child("profileUrl").get().addOnSuccessListener {
+            _profileUrl.value=it.getValue(String::class.java)
+        }
+    }
     fun sendMessage(userNick:String,message:String,chatId: String){
         _isLoading.value=true
         val id=UUID.randomUUID().toString()
@@ -66,5 +73,6 @@ class ChatScreenViewModel:ViewModel() {
             loadChat(userNick,chatId)
 
         }
+
     }
 }
