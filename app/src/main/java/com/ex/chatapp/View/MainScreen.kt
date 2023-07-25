@@ -94,18 +94,19 @@ import com.ex.chatapp.Model.SimpleUser
 import com.ex.chatapp.R
 import com.ex.chatapp.ViewModel.MainScreenViewModel
 import com.ex.chatapp.ui.theme.you
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import java.util.Locale
 
 
 @Composable
-fun MainScreen(nick:String, navController: NavController, viewModel: MainScreenViewModel =remember{ MainScreenViewModel() }){
-    MainScreenGenerate(nick = nick, navController = navController,viewModel=viewModel)
+fun MainScreen(nick:String, navController: NavController, viewModel: MainScreenViewModel =remember{ MainScreenViewModel() },loginNavController: NavController){
+    MainScreenGenerate(nick = nick, navController = navController, viewModel=viewModel, loginNavController  )
     viewModel.loadMessages(nick)
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainScreenViewModel){
+fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainScreenViewModel,loginNavController: NavController){
     val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val isError by viewModel.isError.observeAsState(initial = "")
     val goWithID by viewModel.goWithID.observeAsState(initial = "")
@@ -131,11 +132,19 @@ fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainS
    ModalNavigationDrawer(
        drawerContent = {
             ModalDrawerSheet() {
-                Button(onClick = {
+                Button(
+                    onClick = {
+                        val mAuth = FirebaseAuth.getInstance()
 
-
-                }) {
-
+                        loginNavController.navigate("loginScreen") {
+                            launchSingleTop = true
+                         
+                        }
+                        mAuth.signOut()
+                    },
+                    modifier = Modifier.width(120.dp)
+                ) {
+                    Text(text = "Çıkış yap")
                 }
             }
        },
@@ -470,5 +479,5 @@ fun ChatRow(chatRow: ChatRow, nick: String){
 @Composable
 private fun MainScreenPreview() {
 
-    MainScreenGenerate(nick = "ggci", navController = NavController(LocalContext.current), viewModel = MainScreenViewModel() )
+    MainScreenGenerate(nick = "ggci", navController = NavController(LocalContext.current), loginNavController = NavController(LocalContext.current), viewModel = MainScreenViewModel() )
 }

@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
                         }
                     )){
                         val nick=it.arguments?.getString("nick","noNick")
-                        MainScreen(navController = navController, nick = nick!!)
+                        MainScreen(navController = navController, nick = nick!!, loginNavController =navController)
 
                     }
 
