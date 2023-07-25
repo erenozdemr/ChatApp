@@ -101,6 +101,7 @@ import java.util.Locale
 @Composable
 fun MainScreen(nick:String, navController: NavController, viewModel: MainScreenViewModel =remember{ MainScreenViewModel() }){
     MainScreenGenerate(nick = nick, navController = navController,viewModel=viewModel)
+    viewModel.loadMessages(nick)
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,7 +119,7 @@ fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainS
         mutableStateOf("")
     }
 
-    if(goWithID.isNotBlank()&&otherNick.isNotBlank()){
+    if(!goWithID.isNullOrBlank()&&!otherNick.isNullOrBlank()){
         navController.navigate("ChatScreen/$nick/$otherNick/$goWithID"){
             launchSingleTop = true
         }
@@ -130,7 +131,12 @@ fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainS
    ModalNavigationDrawer(
        drawerContent = {
             ModalDrawerSheet() {
-                Text("Hello")
+                Button(onClick = {
+
+
+                }) {
+
+                }
             }
        },
        drawerState = drawerState
@@ -161,7 +167,7 @@ fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainS
 
            Column(modifier = Modifier
                .fillMaxSize()
-               .padding(top = 25.dp)) {
+               .padding(top = 90.dp)) {
 
                Box(modifier = Modifier.weight(1f)) {
                    Column {
@@ -172,7 +178,7 @@ fun MainScreenGenerate(nick:String,navController: NavController,viewModel: MainS
                        ) {
                            items(items = chatList) {
 
-                               UserEachRow(chatRow = it, nick = nick)
+                               ChatRow(chatRow = it, nick = nick)
                            }
                        }
                    }
@@ -340,12 +346,12 @@ fun UserEachRow(
 
                     )
                     Text(
-                        text = chatRow.messageList.get(chatRow.messageList.size-1).text, modifier = Modifier
+                        text = chatRow.lastMessage, modifier = Modifier
                             .padding(vertical = 2.dp)
                             .padding(start = 15.dp), fontSize = 20.sp, maxLines = 1, color = Color.Gray
                     )
                 }
-                Text(text =chatRow.messageList.get(chatRow.messageList.size-1).date, modifier = Modifier
+                Text(text =chatRow.date, modifier = Modifier
                     .weight(1f)
                     .padding(end = 20.dp), textAlign = TextAlign.End, fontSize = 20.sp)
 
@@ -425,17 +431,17 @@ fun ChatRow(chatRow: ChatRow, nick: String){
                         color = Color.LightGray,
                         maxLines = 1
                     )
-                    Text(text = chatRow.messageList.get(chatRow.messageList.size-1).date.toString()
+                    Text(text = chatRow.date
                         , fontSize = 10.sp)
                 }
 
 
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(text =
-                if (chatRow.messageList.get(chatRow.messageList.size-1).sender==nick){
-                    "$you: ${chatRow.messageList.get(chatRow.messageList.size-1).text}"
+                if (chatRow.otherUser.nick==nick){
+                    "$you: ${chatRow.lastMessage}"
                 }else{
-                    chatRow.messageList.get(chatRow.messageList.size-1).text
+                    chatRow.lastMessage
                 }
                     , color = Color.White,
                     modifier = Modifier.padding(start = 5.dp),
