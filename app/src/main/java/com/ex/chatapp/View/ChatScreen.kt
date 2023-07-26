@@ -1,6 +1,7 @@
 package com.ex.chatapp.View
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -60,6 +61,11 @@ fun ChatScreen(navController: NavController,
     viewModel.loadChat(userNick,chatID)
     viewModel.getPhotoOfOther(otherUserNick)
     viewModel.getAgorId()
+    BackHandler() {
+        navController.navigate("MainScreen/$userNick"){
+            launchSingleTop=true
+        }
+    }
 
 
     ChatScreenGenerate(

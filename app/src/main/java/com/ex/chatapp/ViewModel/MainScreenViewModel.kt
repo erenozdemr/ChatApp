@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
+import java.util.Date
 import java.util.UUID
 import kotlin.math.log
 import kotlin.random.Random
@@ -127,7 +128,8 @@ class MainScreenViewModel : ViewModel() {
                     val list= mutableListOf<SimpleChat>()
 
                     for (child in children) {
-                      val temp: SimpleChat =SimpleChat(child.child("id").getValue(String::class.java)!!,
+                      val temp: SimpleChat =SimpleChat(
+                          child.child("id").getValue(String::class.java)!!,
                       child.child("otherUser").getValue(String::class.java)!!)
                         list.add(temp)
                     }
@@ -152,8 +154,11 @@ class MainScreenViewModel : ViewModel() {
                                               messageList.add(mesage)
 
                                           }
-                                          val chatRow=ChatRow(otherUser = SimpleUser(listItem.otherUser,
-                                              "no")
+                                          messageList.sortBy {
+                                              it.date
+                                          }
+                                          val chatRow=ChatRow(
+                                              otherUser = SimpleUser(listItem.otherUser, "no")
                                               ,messageList.get(messageList.size-1).text,
                                               listItem.id,
                                               messageList.get(messageList.size-1).date
@@ -163,6 +168,10 @@ class MainScreenViewModel : ViewModel() {
                                       }
 
                                   }
+                                }
+
+                                chatList.sortByDescending {
+                                    Date(it.date)
                                 }
                                 _isLoading.value=false
                                 _chatList.value=chatList
