@@ -124,7 +124,7 @@ private fun ScreenRegisterGenerate(navController: NavController, viewModel: Regi
 
 
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)),
                 isError = nickEmpty,
                 supportingText = {
                     if (nickEmpty) {
