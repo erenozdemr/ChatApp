@@ -237,7 +237,10 @@ fun MainScreenGenerate(
                         ) {
                             items(items = chatList) {
 
-                                ChatRow(chatRow = it, nick = nick)
+                                ChatRow(chatRow = it, nick = nick){chatid,otherUserNick->
+                                    navController.navigate("ChatScreen/$nick/$otherUserNick/$chatid")
+                                }
+                                Spacer(modifier = Modifier.size(10.dp))
                             }
                         }
                     }
@@ -295,7 +298,9 @@ fun MainScreenGenerate(
                                 otherNick = it
                                 viewModel.goWithNick(nick, otheruserNick = otherNick)
                             }
+
                         }
+
                     }
                 }
             }
@@ -430,12 +435,14 @@ fun SearchItem(
 }
 
 @Composable
-fun ChatRow(chatRow: ChatRow, nick: String) {
+fun ChatRow(chatRow: ChatRow, nick: String,onClick: (chatId:String,otherUserNick:String) -> Unit) {
 
     Row(
         modifier = Modifier
-            .background(Color.LightGray)
-
+            .background(Color.LightGray,RoundedCornerShape(20.dp))
+            .clickable {
+                onClick(chatRow.chatRowId, chatRow.otherUser.nick)
+            }
             .fillMaxWidth()
             .padding(horizontal = 5.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.SpaceBetween
