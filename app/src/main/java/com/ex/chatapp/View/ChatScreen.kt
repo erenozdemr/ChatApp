@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +49,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.ex.chatapp.Model.Message
 import com.ex.chatapp.R
 import com.ex.chatapp.ViewModel.ChatScreenViewModel
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ChatScreen(navController: NavController,
@@ -56,6 +58,9 @@ fun ChatScreen(navController: NavController,
                chatID:String,
                viewModel: ChatScreenViewModel=remember{ChatScreenViewModel()}){
     viewModel.loadChat(userNick,chatID)
+    viewModel.getPhotoOfOther(otherUserNick)
+    viewModel.getAgorId()
+
 
     ChatScreenGenerate(
         navController = navController,
@@ -76,6 +81,7 @@ fun ChatScreenGenerate(navController: NavController,
     val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val profileUrl by viewModel.profileUrl.observeAsState(initial = "no")
     val isError by viewModel.isError.observeAsState(initial = "")
+    val agoraid by viewModel.agoraID.observeAsState(initial = "")
     val isSucces by viewModel.isSuccess.observeAsState(initial = "")
     val messageList by viewModel.messageList.observeAsState(listOf())
     var prevError by remember { mutableStateOf("") }
@@ -91,40 +97,65 @@ fun ChatScreenGenerate(navController: NavController,
                .background(
                    Color.LightGray,
                    RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
-               )) {
+               ), horizontalArrangement = Arrangement.SpaceBetween) {
 
+               Row() {
+                   Box(
+                       modifier = Modifier
+                           .size(60.dp)
+                           .border(0.dp, Color.Black, CircleShape)
+
+
+                   ) {
+                       if (profileUrl=="no"){
+                           Image(
+                               painter = painterResource(id = R.drawable.default_profile_photo),
+                               contentDescription = "Profile Picture",
+                               modifier = Modifier
+                                   .fillMaxSize()
+                                   .clip(CircleShape)
+                                   .border(0.dp, Color.Black, CircleShape),
+                               contentScale = ContentScale.FillBounds,
+                           )
+                       }else{
+                           Image(
+                               painter = rememberAsyncImagePainter(model = profileUrl),
+                               contentDescription = "Profile Picture",
+                               modifier = Modifier
+                                   .fillMaxSize()
+                                   .clip(CircleShape)
+                                   .border(0.dp, Color.Black, CircleShape),
+                               contentScale = ContentScale.FillBounds,
+                           )
+                       }
+                   }
+
+
+                   Text( modifier = Modifier.padding(top = 15.dp), text = otherUserNick)
+               }
                Box(
                    modifier = Modifier
-                       .size(60.dp)
-                       .border(0.dp, Color.Black, CircleShape)
+                       .size(40.dp)
+                       .padding(top = 10.dp, end = 10.dp)
+                       .clickable {
+                           if (agoraid.isNotBlank()) {
+                               navController.navigate("VideoCallScreen/$chatID/$agoraid")
+                           }
+                       }
 
 
                ) {
-                   if (profileUrl=="no"){
+
                        Image(
-                           painter = painterResource(id = R.drawable.default_profile_photo),
-                           contentDescription = "Profile Picture",
+                           painter = painterResource(id = R.drawable.video_call_image),
+                           contentDescription = "video call button",
                            modifier = Modifier
                                .fillMaxSize()
-                               .clip(CircleShape)
-                               .border(0.dp, Color.Black, CircleShape),
+                               ,
                            contentScale = ContentScale.FillBounds,
                        )
-                   }else{
-                       Image(
-                           painter = rememberAsyncImagePainter(model = profileUrl),
-                           contentDescription = "Profile Picture",
-                           modifier = Modifier
-                               .fillMaxSize()
-                               .clip(CircleShape)
-                               .border(0.dp, Color.Black, CircleShape),
-                           contentScale = ContentScale.FillBounds,
-                       )
-                   }
+
                }
-
-
-               Text( modifier = Modifier.padding(top = 15.dp), text = otherUserNick)
            }
        }
             ) {

@@ -27,6 +27,7 @@ import com.ex.chatapp.View.ChatScreen
 import com.ex.chatapp.View.LoginScreen
 import com.ex.chatapp.View.MainScreen
 import com.ex.chatapp.View.RegisterScreen
+import com.ex.chatapp.View.VideoCallScreen
 import com.ex.chatapp.ui.theme.ChatAppTheme
 import com.ex.chatapp.ui.theme.loginText
 import com.google.firebase.FirebaseApp
@@ -65,6 +66,21 @@ class MainActivity : ComponentActivity() {
                     )){
                         val nick=it.arguments?.getString("nick","noNick")
                         MainScreen(navController = navController, nick = nick!!)
+
+                    }
+
+                    composable("VideoCallScreen/{roomName}/{agoraid}", arguments = listOf(
+                        navArgument("roomName"){
+                            type= NavType.StringType
+                        },
+                        navArgument("agoraid"){
+                            type= NavType.StringType
+                        }
+                    )){
+                        val roomName=it.arguments?.getString("roomName","noNick")
+                        val agoraid=it.arguments?.getString("agoraid","noNick")
+
+                        VideoCallScreen(navController,roomName!!,agoraid!!)
 
                     }
 
