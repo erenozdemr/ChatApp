@@ -163,7 +163,7 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
                             }
                         },
                         label = { Text(text = "E-posta") },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)),
                         colors = TextFieldDefaults.outlinedTextFieldColors(
                             containerColor = Color.LightGray
 
@@ -193,7 +193,7 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
                                 containerColor = Color.LightGray),
                             label = { Text(text = "Şifre") },
                             visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-                            modifier = Modifier.fillMaxWidth(), maxLines = 1,
+                            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)), maxLines = 1,
                             isError = passwordEmpty,
                             supportingText = {
                                 if (passwordEmpty) {
@@ -243,7 +243,7 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
                     }) {
                         Text(text = "Giriş")
                     }
-                    Spacer(modifier = Modifier.height(150.dp))
+                    Spacer(modifier = Modifier.height(140.dp))
                     TextButton(
                         onClick = {
 
