@@ -96,6 +96,7 @@ import com.ex.chatapp.Model.SimpleUser
 import com.ex.chatapp.R
 import com.ex.chatapp.ViewModel.MainScreenViewModel
 import com.ex.chatapp.ui.theme.you
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
@@ -395,7 +396,7 @@ fun UserEachRow(
                     )
                 }
                 Text(
-                    text = chatRow.date, modifier = Modifier
+                    text = Timestamp(chatRow.date,0).toDate().toString(), modifier = Modifier
                         .weight(1f)
                         .padding(end = 20.dp), textAlign = TextAlign.End, fontSize = 20.sp
                 )
@@ -482,7 +483,7 @@ fun ChatRow(chatRow: ChatRow, nick: String,onClick: (chatId:String,otherUserNick
                         maxLines = 1
                     )
                     Text(
-                        text = chatRow.date, fontSize = 10.sp
+                        text = Timestamp(chatRow.date,0).toDate().toString(), fontSize = 10.sp
                     )
                 }
 
