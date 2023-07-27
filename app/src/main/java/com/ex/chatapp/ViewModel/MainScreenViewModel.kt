@@ -161,7 +161,8 @@ class MainScreenViewModel : ViewModel() {
                                               otherUser = SimpleUser(listItem.otherUser, "no")
                                               ,messageList.get(messageList.size-1).text,
                                               listItem.id,
-                                              messageList.get(messageList.size-1).date
+                                              messageList.get(messageList.size-1).date,
+                                              messageList.get(messageList.size-1).sender
                                           )
                                             chatList.add(chatRow)
 

@@ -457,7 +457,6 @@ fun ChatRow(chatRow: ChatRow, nick: String,onClick: (chatId:String,otherUserNick
                 modifier = Modifier
                     .size(75.dp)
 
-
             ) {
                 Image(
                     painter = painter,
@@ -491,7 +490,7 @@ fun ChatRow(chatRow: ChatRow, nick: String,onClick: (chatId:String,otherUserNick
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     text =
-                    if (chatRow.otherUser.nick == nick) {
+                    if (chatRow.whoSendLastmessage == nick) {
                         "$you: ${chatRow.lastMessage}"
                     } else {
                         chatRow.lastMessage

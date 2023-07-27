@@ -1,6 +1,7 @@
 package com.ex.chatapp.View
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
@@ -90,43 +92,24 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
     }
 
     Box(modifier = Modifier){
-        if (isLoading) {
-            previousError=""
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .padding(16.dp),
-                    color = Color.White
-                )
-            }
-        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .alpha(1f)
 
-                .alpha(0.9f)
-                .background(LinearGradient())
-                .clip(
-                    CutCornerShape(
-                        topStart = 8.dp,
-                        topEnd = 16.dp,
-                        bottomStart = 16.dp, bottomEnd = 8.dp
-                    )
-
-                )
 
         ) {
             if (isError.isNotBlank()&&previousError.isBlank()) {
                 Toast.makeText(LocalContext.current, isError, Toast.LENGTH_LONG).show()
                 previousError=isError
             }
-
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(id = R.drawable.backround),
+                contentScale = ContentScale.FillBounds,
+                contentDescription = "background photo"
+            )
 
 
         }
@@ -141,62 +124,38 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Card(modifier = Modifier.padding(10.dp), shape = RoundedCornerShape(25.dp)) {
+                        Text(
+                            text = "Giriş",
+                            fontSize = 40.sp,
+                            modifier = Modifier
+                                .padding(5.dp)
+                                .padding(vertical = 5.dp)
+                                .fillMaxWidth()
+                        )
 
 
-                    Text(
-                        text = "Giriş",
-                        fontSize = 40.sp,
-                        modifier = Modifier
-                            .padding(5.dp)
-                            .padding(vertical = 5.dp)
-                            .fillMaxWidth()
-                    )
 
-
-
-                    OutlinedTextField(value = email,
-                        onValueChange = {
-                            if (it.isEmpty()) {
-                                email = it
-                            } else if (!it[it.length - 1].isWhitespace()) {
-                                email = it.lowercase(Locale.ENGLISH)
-                            }
-                        },
-                        label = { Text(text = "E-posta") },
-                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)),
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            containerColor = Color.LightGray
-
-                        ),
-
-                        supportingText = {
-                            if (emailEmpty) {
-                                Text(
-                                    text = "Doldurulması zorunlu alan",
-                                    style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp)
-                                )
-                            }
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            value = password,
+                        OutlinedTextField(value = email,
                             onValueChange = {
                                 if (it.isEmpty()) {
-                                    password = it
+                                    email = it
                                 } else if (!it[it.length - 1].isWhitespace()) {
-                                    password = it
+                                    email = it.lowercase(Locale.ENGLISH)
                                 }
-                            },  colors = TextFieldDefaults.outlinedTextFieldColors(
-                                containerColor = Color.LightGray),
-                            label = { Text(text = "Şifre") },
-                            visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
-                            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)), maxLines = 1,
-                            isError = passwordEmpty,
+                            },
+                            label = { Text(text = "E-posta") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp),
+                            maxLines = 1, singleLine = true,
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = Color.LightGray
+
+                            ),
+
                             supportingText = {
-                                if (passwordEmpty) {
+                                if (emailEmpty) {
                                     Text(
                                         text = "Doldurulması zorunlu alan",
                                         style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp)
@@ -204,45 +163,80 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
                                 }
                             }
                         )
-                        IconButton(
-                            onClick = {
-                                passwordVisibility = !passwordVisibility
-                            },
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                            modifier = Modifier
-                                .size(35.dp)
-                                .align(Alignment.CenterEnd)
-                                .padding(end = 10.dp, top = 5.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = if (passwordVisibility) R.drawable.show else R.drawable.eye),
-                                contentDescription = if (passwordVisibility) "Şifreyi Gizle" else "Şifreyi Göster",
-                                tint = Color.Gray, modifier = Modifier.size(60.dp)
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            OutlinedTextField(
+                                value = password,
+                                onValueChange = {
+                                    if (it.isEmpty()) {
+                                        password = it
+                                    } else if (!it[it.length - 1].isWhitespace()) {
+                                        password = it
+                                    }
+                                },  colors = TextFieldDefaults.outlinedTextFieldColors(
+                                    containerColor = Color.LightGray),
+                                label = { Text(text = "Şifre") },
+                                visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                maxLines = 1, singleLine = true,
+                                isError = passwordEmpty,
+                                supportingText = {
+                                    if (passwordEmpty) {
+                                        Text(
+                                            text = "Doldurulması zorunlu alan",
+                                            style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp)
+                                        )
+                                    }
+                                }
                             )
+                            IconButton(
+                                onClick = {
+                                    passwordVisibility = !passwordVisibility
+                                },
+
+                                modifier = Modifier
+                                    .size(35.dp)
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 15.dp, top = 5.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = if (passwordVisibility) R.drawable.show else R.drawable.eye),
+                                    contentDescription = if (passwordVisibility) "Şifreyi Gizle" else "Şifreyi Göster",
+                                    tint = Color.Gray, modifier = Modifier.size(60.dp)
+                                )
+                            }
+
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                            Button(modifier = Modifier.fillMaxWidth(0.6f),
+                                colors = ButtonDefaults.buttonColors(
+                                    Color(0xFF2C519B)
+                                )
+                                ,onClick = {
+                                    emailEmpty=false
+                                    passwordEmpty=false
+
+                                    if(email.isNullOrEmpty()){
+                                        emailEmpty=true
+                                    }
+                                    if(password.isNullOrEmpty()){
+                                        passwordEmpty=true
+                                    }
+                                    if(!emailEmpty&&!passwordEmpty){
+                                        viewModel.Login(email, password = password)
+                                    }
+                                }) {
+                                Text(text = "Giriş")
+                            }
                         }
 
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(modifier = Modifier.fillMaxWidth(0.6f),
-                        colors = ButtonDefaults.buttonColors(
-                        Color(0xFF2C519B)
-                        )
-                    ,onClick = {
-                        emailEmpty=false
-                        passwordEmpty=false
 
-                        if(email.isNullOrEmpty()){
-                            emailEmpty=true
-                        }
-                        if(password.isNullOrEmpty()){
-                            passwordEmpty=true
-                        }
-                        if(!emailEmpty&&!passwordEmpty){
-                           viewModel.Login(email, password = password)
-                        }
-                    }) {
-                        Text(text = "Giriş")
-                    }
+
                     Spacer(modifier = Modifier.height(140.dp))
                     TextButton(
                         onClick = {
@@ -254,7 +248,8 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
 
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 10.dp, start = 50.dp, end = 50.dp)
+                            .background(Color.White, RoundedCornerShape(25.dp))
+                            .padding(top = 10.dp, start = 70.dp, end = 70.dp, bottom = 10.dp)
                     ) {
                         Row() {
                             Text(text = "Hesabın yok mu?",fontSize = 17.sp, color = Color.DarkGray)
@@ -266,6 +261,22 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
 
 
                 }
+            }
+        }
+        if (isLoading) {
+            previousError=""
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(16.dp),
+                    color = Color.White
+                )
             }
         }
 

@@ -1,10 +1,11 @@
 package com.ex.chatapp.Model
 
 data class ChatRow(
-    var otherUser: SimpleUser,
-    var lastMessage:String,
-    var chatRowId: String,
-    val date:String
+    val otherUser: SimpleUser,
+    val lastMessage:String,
+    val chatRowId: String,
+    val date:String,
+    val whoSendLastmessage:String
 
 ) {
 }
