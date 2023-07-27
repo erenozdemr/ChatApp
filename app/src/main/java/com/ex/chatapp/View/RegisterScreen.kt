@@ -1,6 +1,7 @@
 package com.ex.chatapp.View
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,12 +32,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.ex.chatapp.R
 import com.ex.chatapp.ViewModel.RegisterScreenViewModel
 import java.util.Locale
 
@@ -78,24 +82,26 @@ private fun ScreenRegisterGenerate(navController: NavController, viewModel: Regi
         Box(
             modifier = Modifier
                 .fillMaxSize()
-
-                .alpha(0.9f)
-                .background(LinearGradient())
-                .clip(
-                    CutCornerShape(
-                        topStart = 8.dp,
-                        topEnd = 16.dp,
-                        bottomStart = 16.dp, bottomEnd = 8.dp
-                    )
-                )
-
-        )
+                .alpha(1f)
 
 
-        if (isError.isNotBlank()&&previousError.isBlank()) {
-            Toast.makeText(LocalContext.current, isError, Toast.LENGTH_LONG).show()
-            previousError=isError
+        ) {
+            if (isError.isNotBlank()&&previousError.isBlank()) {
+                Toast.makeText(LocalContext.current, isError, Toast.LENGTH_LONG).show()
+                previousError=isError
+            }
+            Image(
+                modifier = Modifier.fillMaxSize(),
+                painter = painterResource(id = R.drawable.backround),
+                contentScale = ContentScale.FillBounds,
+                contentDescription = "background photo"
+            )
+
+
         }
+
+
+
 
         Column(
             modifier = Modifier
@@ -124,7 +130,7 @@ private fun ScreenRegisterGenerate(navController: NavController, viewModel: Regi
 
 
                 ),
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)),
+                modifier = Modifier.fillMaxWidth(),
                 isError = nickEmpty,
                 supportingText = {
                     if (nickEmpty) {

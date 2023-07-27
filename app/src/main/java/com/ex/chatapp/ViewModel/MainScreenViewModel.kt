@@ -1,8 +1,6 @@
 package com.ex.chatapp.ViewModel
 
 
-import android.util.Log
-import androidx.compose.runtime.clearCompositionErrors
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,17 +9,14 @@ import com.ex.chatapp.Model.ChatRow
 import com.ex.chatapp.Model.Message
 import com.ex.chatapp.Model.SimpleChat
 import com.ex.chatapp.Model.SimpleUser
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.GenericTypeIndicator
 import com.google.firebase.database.ValueEventListener
-import java.util.Date
+import com.google.type.Date
 import java.util.UUID
-import kotlin.math.log
-import kotlin.random.Random
 
 class MainScreenViewModel : ViewModel() {
     private val _isLoading = MutableLiveData(false)
@@ -148,9 +143,11 @@ class MainScreenViewModel : ViewModel() {
                                               val mesage =Message(it.child("text").getValue(String::class.java)!!,
                                               it.child("sender").getValue(String::class.java)!!,
                                               it.child("messageId").getValue(String::class.java)!!,
-                                              it.child("date").getValue(String::class.java)!!
+                                              it.child("date").getValue(Long::class.java)!!
+
 
                                              )
+
                                               messageList.add(mesage)
 
                                           }
@@ -161,7 +158,8 @@ class MainScreenViewModel : ViewModel() {
                                               otherUser = SimpleUser(listItem.otherUser, "no")
                                               ,messageList.get(messageList.size-1).text,
                                               listItem.id,
-                                              messageList.get(messageList.size-1).date
+                                              messageList.get(messageList.size-1).date,
+                                              messageList.get(messageList.size-1).sender
                                           )
                                             chatList.add(chatRow)
 
@@ -171,7 +169,7 @@ class MainScreenViewModel : ViewModel() {
                                 }
 
                                 chatList.sortByDescending {
-                                    Date(it.date)
+                                    it.date
                                 }
                                 _isLoading.value=false
                                 _chatList.value=chatList
