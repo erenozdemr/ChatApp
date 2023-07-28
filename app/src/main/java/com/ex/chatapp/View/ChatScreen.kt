@@ -57,7 +57,7 @@ fun ChatScreen(navController: NavController,
                userNick:String,
                otherUserNick:String,
                chatID:String,
-               viewModel: ChatScreenViewModel=remember{ChatScreenViewModel()}){
+               viewModel: ChatScreenViewModel=remember{ChatScreenViewModel(chatID)}){
     viewModel.loadChat(userNick,chatID)
     viewModel.getPhotoOfOther(otherUserNick)
     viewModel.getAgorId()
@@ -135,16 +135,17 @@ fun ChatScreenGenerate(navController: NavController,
                                contentScale = ContentScale.FillBounds,
                            )
                        }
+                       Box(
+                           modifier = Modifier.align(Alignment.BottomEnd)
+                               .size(20.dp)
+                               .background(if (status) Color.Green else Color.Red,
+                                   CircleShape)
+                       )
                    }
 
 
                    Text( modifier = Modifier.padding(top = 15.dp), text = otherUserNick)
-                   Box(
-                       modifier = Modifier
-                           .size(5.dp)
-                           .background(if (status) Color.Green else Color.Red,
-                               CircleShape)
-                   )
+
                }
                Box(
                    modifier = Modifier
@@ -279,7 +280,7 @@ fun MessageBubble(message: Message, userNick:String){
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
 private fun ChatScreenPreview() {
-    ChatScreenGenerate(userNick = "ggci", navController = NavController(LocalContext.current), viewModel = ChatScreenViewModel(), otherUserNick = "hakan", chatID = "ads" )
+    ChatScreenGenerate(userNick = "ggci", navController = NavController(LocalContext.current), viewModel = ChatScreenViewModel(""), otherUserNick = "hakan", chatID = "ads" )
 }
 
 @Composable
