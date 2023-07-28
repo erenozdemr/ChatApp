@@ -32,8 +32,11 @@ import com.ex.chatapp.ui.theme.ChatAppTheme
 import com.ex.chatapp.ui.theme.loginText
 import com.google.firebase.FirebaseApp
 
+
+lateinit var viewModel: MainActivityViewModel
 class MyApplication : Application() {
     override fun onCreate() {
+        viewModel= MainActivityViewModel()
         super.onCreate()
         FirebaseApp.initializeApp(this)
     }
@@ -42,6 +45,7 @@ class MyApplication : Application() {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(applicationContext)
+        viewModel=MainActivityViewModel()
         super.onCreate(savedInstanceState)
         setContent {
             ChatAppTheme {
@@ -50,7 +54,10 @@ class MainActivity : ComponentActivity() {
                 val navController= rememberNavController()
                 NavHost(navController =navController, startDestination = "LoginScreen"){
                     composable(route = "LoginScreen"){
-                        LoginScreen(navController = navController)
+
+                        LoginScreen(navController = navController){
+                            onDestroy()
+                        }
 
                     }
 
@@ -65,6 +72,9 @@ class MainActivity : ComponentActivity() {
                         }
                     )){
                         val nick=it.arguments?.getString("nick","noNick")
+                        viewModel.saveNick(nick!!)
+                        viewModel.setStatus(online = true)
+
                         MainScreen(navController = navController, nick = nick!!, loginNavController =navController)
 
                     }
@@ -98,6 +108,8 @@ class MainActivity : ComponentActivity() {
                         val userNick=it.arguments?.getString("userNick","noNick")
                         val otherUserNick=it.arguments?.getString("otherUserNick","noNick")
                         val chatID=it.arguments?.getString("chatID","noID")
+                        viewModel.saveNick(userNick!!)
+                        viewModel.setStatus(online = true)
 
                         ChatScreen(navController = navController, userNick = userNick!!,otherUserNick=otherUserNick!!,chatID=chatID!!)
 
@@ -106,6 +118,16 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.setStatus(false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.setStatus(false)
     }
 }
 

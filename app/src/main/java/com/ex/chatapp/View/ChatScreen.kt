@@ -85,6 +85,7 @@ fun ChatScreenGenerate(navController: NavController,
                        chatID:String,
                        viewModel: ChatScreenViewModel){
     val isLoading by viewModel.isLoading.observeAsState(initial = false)
+    val status by viewModel.status.observeAsState(initial = false)
     val profileUrl by viewModel.profileUrl.observeAsState(initial = "no")
     val isError by viewModel.isError.observeAsState(initial = "")
     val agoraid by viewModel.agoraID.observeAsState(initial = "")
@@ -105,7 +106,7 @@ fun ChatScreenGenerate(navController: NavController,
                    RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
                ), horizontalArrangement = Arrangement.SpaceBetween) {
 
-               Row() {
+               Row {
                    Box(
                        modifier = Modifier
                            .size(60.dp)
@@ -138,6 +139,12 @@ fun ChatScreenGenerate(navController: NavController,
 
 
                    Text( modifier = Modifier.padding(top = 15.dp), text = otherUserNick)
+                   Box(
+                       modifier = Modifier
+                           .size(5.dp)
+                           .background(if (status) Color.Green else Color.Red,
+                               CircleShape)
+                   )
                }
                Box(
                    modifier = Modifier
