@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.util.UUID
 
-class ChatScreenViewModel:ViewModel() {
+class ChatScreenViewModel(chatId: String):ViewModel() {
     private val _isLoading = MutableLiveData(false)
     private val _status = MutableLiveData(false)
     private val _messagleList = MutableLiveData(listOf<Message>())
@@ -33,11 +33,49 @@ class ChatScreenViewModel:ViewModel() {
     private val _agoraId = MutableLiveData("")
     val agoraID: LiveData<String> = _agoraId
 
-    private val _onJoinEvent = MutableSharedFlow<String>()
-    val onjoinEvent = _onJoinEvent.asSharedFlow()
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val database= FirebaseDatabase.getInstance().reference
+
+    init {
+        database.child("chats").child(chatId).orderByChild("date").addChildEventListener(object:ChildEventListener{
+
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                var list= mutableListOf<Message>()
+                val children=snapshot
+
+                val message=Message(children.child("text").getValue(String::class.java)?:"",
+                    children.child("sender").getValue(String::class.java)?:"",
+                    children.key?:"",
+                    children.child("date").getValue(Long::class.java)?:16565
+                )
+
+                var temp=if(!_messagleList.value.isNullOrEmpty())_messagleList.value as MutableList? else mutableListOf()
+                temp?.add(message)
+                _isLoading.value=false
+                _messagleList.value=temp
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("system message","on cancelled e girildi")
+                _isLoading.value=false
+                _isError.value=error.message
+            }
+
+        })
+    }
 
 
 
@@ -66,43 +104,7 @@ class ChatScreenViewModel:ViewModel() {
             }
 
         })
-        /*database.child("chats").child(chatId).orderByChild("date").addChildEventListener(object:ChildEventListener{
 
-            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
-                var list= mutableListOf<Message>()
-                Log.e("system message","on data changed e girildi")
-                val children=snapshot.children
-                for (child in children){
-                    val message=Message(child.child("text").getValue(String::class.java)?:"",
-                        child.child("sender").getValue(String::class.java)?:"",
-                        child.key?:"",
-                        child.child("date").getValue(Long::class.java)?:16565
-                    )
-                    list.add(message)
-                }
-                _isLoading.value=false
-                _messagleList.value=list
-            }
-
-            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onChildRemoved(snapshot: DataSnapshot) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
-                TODO("Not yet implemented")
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("system message","on cancelled e girildi")
-                _isLoading.value=false
-                _isError.value=error.message
-            }
-
-        })*/
     }
     fun getPhotoOfOther(otherUserNick:String){
         database.child("users").child(otherUserNick).child("profileUrl").get().addOnSuccessListener {
