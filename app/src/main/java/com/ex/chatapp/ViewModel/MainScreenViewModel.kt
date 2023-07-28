@@ -4,6 +4,7 @@ package com.ex.chatapp.ViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
 import com.ex.chatapp.Model.Chat
 import com.ex.chatapp.Model.ChatRow
 import com.ex.chatapp.Model.Message
@@ -46,8 +47,9 @@ class MainScreenViewModel : ViewModel() {
                 dataSnapshot.children.forEach { snapshot ->
                     val nickName = snapshot.key
                     val photoUrl = snapshot.child("photoUrl").getValue(String::class.java) ?: "no"
+                    val status = snapshot.child("status").getValue(Boolean::class.java) ?: false
                     if (nickName != userNick) {
-                        val user = SimpleUser(nickName!!, photoUrl)
+                        val user = SimpleUser(nickName!!, photoUrl,status)
                         list.add(user)
                     }
 
@@ -113,10 +115,19 @@ class MainScreenViewModel : ViewModel() {
             }
     }
 
+    fun logOut(nick:String,navController: NavController){
+        database.child("users").child(nick).child("status").setValue(false).addOnSuccessListener {
+            navController.navigate("LoginScreen"){
+                launchSingleTop=true
+            }
+            auth.signOut()
+        }
+    }
+
     fun loadMessages(nick: String) {
         _isLoading.value = true
 
-        database.child("users").child(nick).child("chats").addListenerForSingleValueEvent(
+        database.child("users").child(nick).child("chats").addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     var children = snapshot.children
@@ -125,10 +136,11 @@ class MainScreenViewModel : ViewModel() {
                     for (child in children) {
                       val temp: SimpleChat =SimpleChat(
                           child.child("id").getValue(String::class.java)!!,
-                      child.child("otherUser").getValue(String::class.java)!!)
+                      child.child("otherUser").getValue(String::class.java)!!
+                      )
                         list.add(temp)
                     }
-                    database.child("chats").addListenerForSingleValueEvent(
+                    database.child("chats").addValueEventListener(
                         object :ValueEventListener{
                             override fun onDataChange(snapshot: DataSnapshot) {
                             val children2=snapshot.children
@@ -155,7 +167,7 @@ class MainScreenViewModel : ViewModel() {
                                               it.date
                                           }
                                           val chatRow=ChatRow(
-                                              otherUser = SimpleUser(listItem.otherUser, "no")
+                                              otherUser = SimpleUser(listItem.otherUser, "no",false)
                                               ,messageList.get(messageList.size-1).text,
                                               listItem.id,
                                               messageList.get(messageList.size-1).date,

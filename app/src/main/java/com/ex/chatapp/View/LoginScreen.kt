@@ -1,6 +1,7 @@
 package com.ex.chatapp.View
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,13 +59,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.ex.chatapp.MainActivity
 import com.ex.chatapp.R
 import com.ex.chatapp.ViewModel.LoginScreenViewModel
 import java.util.Locale
 
 @Composable
-fun LoginScreen(navController: NavController,viewModel: LoginScreenViewModel=remember{ LoginScreenViewModel() }) {
+fun LoginScreen(
+    navController: NavController,
+    viewModel: LoginScreenViewModel = remember { LoginScreenViewModel() },
+    onBackPressed:()->Unit
+) {
     viewModel.directLogin()
+    BackHandler() {
+        onBackPressed()
+    }
    LoginScreenGenerate(navController = navController, viewModel = viewModel)
 }
 
@@ -90,6 +99,7 @@ fun LoginScreenGenerate(navController:NavController,viewModel:LoginScreenViewMod
             launchSingleTop = true
         }
     }
+
 
     Box(modifier = Modifier){
 

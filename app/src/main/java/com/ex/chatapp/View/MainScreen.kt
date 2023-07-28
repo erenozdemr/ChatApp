@@ -91,6 +91,7 @@ import androidx.compose.ui.unit.sp
 
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
+import com.ex.chatapp.MainActivityViewModel
 import com.ex.chatapp.Model.ChatRow
 import com.ex.chatapp.Model.SimpleUser
 import com.ex.chatapp.R
@@ -177,13 +178,8 @@ fun MainScreenGenerate(
 
                     Button(
                         onClick = {
-                            val mAuth = FirebaseAuth.getInstance()
+                            viewModel.logOut(nick,navController)
 
-                            loginNavController.navigate("loginScreen") {
-                                launchSingleTop = true
-
-                            }
-                            mAuth.signOut()
                         },
                         modifier = Modifier
                             .width(120.dp)
