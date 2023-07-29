@@ -232,7 +232,7 @@ fun ChatScreenGenerate(navController: NavController,
                    painter = painterResource(id = R.drawable.send_m)
                ) {
                    if (message.isNotBlank()) {
-                       viewModel.sendMessage(userNick, message, chatID)
+                       viewModel.sendMessage(userNick,otherUserNick, message, chatID)
                        message = ""
                    }
                }

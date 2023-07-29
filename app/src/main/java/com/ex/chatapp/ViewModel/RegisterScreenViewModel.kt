@@ -7,6 +7,11 @@ import com.ex.chatapp.Model.User
 import com.ex.chatapp.ui.theme.nickClaimedText
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.iid.FirebaseInstanceIdReceiver
+import com.google.firebase.iid.internal.FirebaseInstanceIdInternal
+import com.google.firebase.installations.FirebaseInstallations
+import com.google.firebase.installations.FirebaseInstallationsException
+import com.google.firebase.messaging.FirebaseMessaging
 
 
 class RegisterScreenViewModel:ViewModel() {
@@ -35,21 +40,24 @@ class RegisterScreenViewModel:ViewModel() {
                 _isError.value= nickClaimedText
             }else{
 
-                val user= User(email = email)
-                auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
+                FirebaseInstallations.getInstance().id.addOnSuccessListener {
 
-                    database.child("users").child(nick).setValue(user).addOnSuccessListener {
-                        _isLoading.value=false
-                        _isSuccess.value=true
+                    val user = User(email = email, token = it)
+                    auth.createUserWithEmailAndPassword(email, password).addOnSuccessListener {
+
+                        database.child("users").child(nick).setValue(user).addOnSuccessListener {
+                            _isLoading.value = false
+                            _isSuccess.value = true
+
+                        }.addOnFailureListener {
+                            _isLoading.value = false
+                            _isError.value = it.localizedMessage
+                        }
 
                     }.addOnFailureListener {
-                        _isLoading.value=false
-                        _isError.value=it.localizedMessage
+                        _isLoading.value = false
+                        _isError.value = it.localizedMessage
                     }
-
-                }.addOnFailureListener {
-                    _isLoading.value=false
-                    _isError.value=it.localizedMessage
                 }
 
 

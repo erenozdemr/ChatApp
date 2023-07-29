@@ -5,12 +5,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ex.chatapp.Model.Message
+import com.ex.chatapp.Model.NotificationData
+import com.ex.chatapp.Model.PushNotification
+import com.ex.chatapp.ui.theme.sendNotification
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.util.UUID
@@ -122,7 +126,7 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
         })
 
     }
-    fun sendMessage(userNick:String,message:String,chatId: String){
+    fun sendMessage(userNick:String,otherUserNick: String,message:String,chatId: String){
         _isLoading.value=true
         val id=UUID.randomUUID().toString()
         val mes=Message(
@@ -132,11 +136,23 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
         date = com.google.firebase.Timestamp.now().seconds)
         database.child("chats").child(chatId).child(id).setValue(mes).addOnSuccessListener {
             _isLoading.value=false
+            sendNotificationToUser(userNick, otherUserNick)
             loadChat(userNick,chatId)
 
         }
 
     }
+    fun sendNotificationToUser(userNick: String,otherUserNick: String){
+        database.child("users").child(otherUserNick).child("token").get().addOnSuccessListener {
+            val token=it.getValue(String::class.java)?:""
+            FirebaseMessaging.getInstance().subscribeToTopic(token)
+            PushNotification(NotificationData("Yeni mesaj","$userNick sana yeni bir mesaj gönderdi haberin olsun :)"),token).apply {
+                sendNotification(this)
+            }
+
+        }
+    }
+
 
 
     fun getAgorId(){
