@@ -51,6 +51,7 @@ android {
 
 
 dependencies {
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.2.0'
     var nav_version = "2.6.0"
     var room_version = "2.5.2"
 
@@ -132,6 +133,11 @@ dependencies {
 
     // Coroutine Lifecycle Scopes
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
+
+
+    // Retrofit
+    implementation 'com.squareup.retrofit2:retrofit:2.6.2'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
 
 
 }
