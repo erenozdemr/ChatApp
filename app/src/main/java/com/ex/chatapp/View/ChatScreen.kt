@@ -1,7 +1,11 @@
 package com.ex.chatapp.View
 
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +27,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -39,6 +45,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +54,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.ImageLoader
+import coil.compose.AsyncImagePainter.State.Empty.painter
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.ex.chatapp.Model.Message
 import com.ex.chatapp.R
 import com.ex.chatapp.ViewModel.ChatScreenViewModel
@@ -90,11 +101,37 @@ fun ChatScreenGenerate(navController: NavController,
     val isError by viewModel.isError.observeAsState(initial = "")
     val agoraid by viewModel.agoraID.observeAsState(initial = "")
     val isSucces by viewModel.isSuccess.observeAsState(initial = "")
+    val imageLoader = ImageLoader(LocalContext.current)
+
+    val imageUri = remember { mutableStateOf<Uri?>(null) }
+
     val messageList by viewModel.messageList.observeAsState(listOf())
     var prevError by remember { mutableStateOf("") }
+    var painter :Painter? by remember {
+        mutableStateOf(null)
+    }
 
     var message by remember{ mutableStateOf("") }
 
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? -> imageUri.value = uri }
+    )
+    val pickImageButton = {
+        pickImageLauncher.launch("image/*")
+
+    }
+    val request = ImageRequest.Builder(LocalContext.current)
+        .data(imageUri.value)
+        .target { result ->
+            val bitmap = (result as BitmapDrawable).bitmap
+            painter = BitmapPainter(bitmap.asImageBitmap())
+        }
+        .build()
+    if (imageUri.value != null) {
+        imageLoader.enqueue(request)
+    }
 
    Scaffold(
        modifier = Modifier.fillMaxSize(),
@@ -136,10 +173,13 @@ fun ChatScreenGenerate(navController: NavController,
                            )
                        }
                        Box(
-                           modifier = Modifier.align(Alignment.BottomEnd)
+                           modifier = Modifier
+                               .align(Alignment.BottomEnd)
                                .size(20.dp)
-                               .background(if (status) Color.Green else Color.Red,
-                                   CircleShape)
+                               .background(
+                                   if (status) Color.Green else Color.Red,
+                                   CircleShape
+                               )
                        )
                    }
 
@@ -213,27 +253,45 @@ fun ChatScreenGenerate(navController: NavController,
                }
            }
 
-           Row(modifier = Modifier.padding(bottom = 5.dp)) {
-               OutlinedTextField(
-                   modifier = Modifier.weight(1f),
-                   value = message, maxLines = 1,
-                   onValueChange = { message = it },
-                   placeholder = { Text(text = "message...") },
-                   colors = TextFieldDefaults.textFieldColors(
-                       containerColor = Color.Gray,
-                       unfocusedIndicatorColor = Color.Transparent,
-                       focusedIndicatorColor = Color.Transparent
-                   ),
-                   shape = CircleShape
-               )
-               Spacer(modifier = Modifier.width(8.dp))
-               ImageButton(
-                   modifier = Modifier.size(50.dp),
-                   painter = painterResource(id = R.drawable.send_m)
-               ) {
-                   if (message.isNotBlank()) {
-                       viewModel.sendMessage(userNick, message, chatID)
-                       message = ""
+           Column(modifier = Modifier.fillMaxWidth().background(Color.DarkGray)) {
+               if(imageUri.value!=null && painter!=null){
+                 Image(painter = painter!!, contentDescription = "message image", modifier = Modifier.size(height = 150.dp, width = 300.dp))
+               }
+               Row(modifier = Modifier.padding(bottom = 5.dp,top=5.dp)) {
+                   OutlinedTextField(
+                       modifier = Modifier.weight(1f),
+                       value = message, maxLines = 1,
+                       onValueChange = { message = it },
+                       placeholder = { Text(text = "message...") },
+                       colors = TextFieldDefaults.textFieldColors(
+                           containerColor = Color.Gray,
+                           unfocusedIndicatorColor = Color.Transparent,
+                           focusedIndicatorColor = Color.Transparent
+                       ),
+                       shape = CircleShape
+                   )
+                   Spacer(modifier = Modifier.width(5.dp))
+                   ImageButton(
+                       modifier = Modifier
+                           .size(50.dp)
+                           ,
+                       painter = painterResource(id = R.drawable.plus)
+                   ) {
+                       pickImageButton()
+                   }
+                   Spacer(modifier = Modifier.width(3.dp))
+                   ImageButton(
+                       modifier = Modifier
+                           .size(50.dp)
+                           ,
+                       painter = painterResource(id = R.drawable.send_m)
+                   ) {
+                       if (message.isNotBlank() || imageUri.value!=null) {
+                           viewModel.sendMessage(userNick, message, chatID,imageUri.value)
+                           message = ""
+                           imageUri.value=null
+                           painter=null
+                       }
                    }
                }
            }
@@ -264,9 +322,24 @@ fun MessageBubble(message: Message, userNick:String){
                 }, shape = RoundedCornerShape(10.dp)
             )
         ) {
-                Text(modifier=Modifier.padding(5.dp),
-                    text = message.text
-                )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if(!message.imageUrl.isNullOrEmpty()){
+                    Image(
+                        painter = rememberAsyncImagePainter(model = message.imageUrl!!),
+                        contentDescription = "message image ",
+                        modifier = Modifier.size(100.dp),
+                        contentScale = ContentScale.Fit
+                    )
+
+                }
+                if(message.text.isNotBlank()){
+                    Text(modifier=Modifier.padding(5.dp),
+                        text = message.text
+                    )
+                }
+
+            }
+
         }
 
 

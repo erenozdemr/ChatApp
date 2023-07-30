@@ -135,8 +135,9 @@ class MainScreenViewModel : ViewModel() {
 
                     for (child in children) {
                       val temp: SimpleChat =SimpleChat(
-                          child.child("id").getValue(String::class.java)!!,
-                      child.child("otherUser").getValue(String::class.java)!!
+
+                            child.child("id").getValue(String::class.java)!!,
+                            child.child("otherUser").getValue(String::class.java)!!
                       )
                         list.add(temp)
                     }
@@ -168,7 +169,7 @@ class MainScreenViewModel : ViewModel() {
                                           }
                                           val chatRow=ChatRow(
                                               otherUser = SimpleUser(listItem.otherUser, "no",false)
-                                              ,messageList.get(messageList.size-1).text,
+                                              ,if(messageList.get(messageList.size-1).text.isBlank())"-Fotoğraf-" else messageList.get(messageList.size-1).text,
                                               listItem.id,
                                               messageList.get(messageList.size-1).date,
                                               messageList.get(messageList.size-1).sender
