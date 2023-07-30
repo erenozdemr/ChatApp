@@ -1,12 +1,16 @@
 package com.ex.chatapp.View
 
 
+import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.compose.foundation.BorderStroke
 
 import android.widget.Space
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -81,6 +85,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -88,9 +94,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 import androidx.navigation.NavController
+import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.ex.chatapp.MainActivityViewModel
 import com.ex.chatapp.Model.ChatRow
 import com.ex.chatapp.Model.SimpleUser
@@ -131,10 +141,45 @@ fun MainScreenGenerate(
     val isLoading by viewModel.isLoading.observeAsState(initial = false)
     val isError by viewModel.isError.observeAsState(initial = "")
     val goWithID by viewModel.goWithID.observeAsState(initial = "")
+    val profile by viewModel.profile.observeAsState(initial = "no")
     val chatList by viewModel.chatList.observeAsState(listOf())
     val searchItems by viewModel.searchList.observeAsState(initial = listOf())
     var prevError by remember { mutableStateOf("") }
     var otherNick by remember { mutableStateOf("") }
+    var dialogOpen by remember { mutableStateOf(false) }
+
+
+    val imageLoader = ImageLoader(LocalContext.current)
+
+    val imageUri = remember { mutableStateOf<Uri?>(null) }
+
+    var painter :Painter? by remember {
+        mutableStateOf(null)
+    }
+
+
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? -> imageUri.value = uri }
+    )
+    val pickImageButton = {
+        pickImageLauncher.launch("image/*")
+
+    }
+    val request = ImageRequest.Builder(LocalContext.current)
+        .data(imageUri.value)
+        .target { result ->
+            val bitmap = (result as BitmapDrawable).bitmap
+            painter = BitmapPainter(bitmap.asImageBitmap())
+        }
+        .build()
+    if (imageUri.value != null) {
+        imageLoader.enqueue(request)
+        viewModel.loadProfilePhoto(imageUri.value!!,nick)
+        imageUri.value=null
+        
+    }
 
 
     var search by remember {
@@ -149,6 +194,22 @@ fun MainScreenGenerate(
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    if(dialogOpen){
+        val dialog= Dialog(onDismissRequest = {     dialogOpen=false     }, properties = DialogProperties()) {
+            Card{
+                Column(modifier = Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = "Profil fotoğrafınızı değiştirmek istiyor musunuz?", modifier = Modifier.padding(10.dp))
+                    Button(onClick = { pickImageButton() }, modifier = Modifier.padding(10.dp)) {
+                        Text(text = "Değiştir")
+                    }
+                }
+            }
+
+        }
+    }
+    
+
+    
 
     ModalNavigationDrawer(
         drawerContent = {
@@ -165,12 +226,30 @@ fun MainScreenGenerate(
                         ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-
-                    Image(painter = painterResource(id = R.drawable.user),
-                        contentDescription = "user",
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                            .padding(top = 10.dp))
+                    if(profile=="no"){
+                        Image(painter = painterResource(id = R.drawable.default_profile_photo),
+                            contentDescription = "user",
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .padding(top = 10.dp).clip(CircleShape)
+                                .border(0.dp, Color.Black, CircleShape)
+                                .clickable {
+                                    dialogOpen=true
+                                }
+                        )
+                    }else{
+                        Image(painter = rememberAsyncImagePainter(model = profile),
+                            contentDescription = "user",
+                            modifier = Modifier
+                                .fillMaxWidth(0.5f)
+                                .padding(top = 10.dp).clip(CircleShape)
+                                .border(0.dp, Color.Black, CircleShape)
+                                .clickable {
+                                    dialogOpen=true
+                                }
+                        )
+                    }
+                    
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Text(text =nick , modifier = Modifier)
@@ -309,102 +388,9 @@ fun MainScreenGenerate(
 
 }
 
-@Composable
-fun SearchItem(item: String) {
-    Row() {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .clickable {
-                    //   navController.navigate("profile_screen/$userNick/$item")
-                }
-                .padding(start = 25.dp, top = 8.dp, bottom = 4.dp, end = 5.dp)
-                .size(45.dp)
-                .background(
-                    color = Color(0xFFDEE1E7)
-                )
-        ) {
-            Row() {
-                /* Image(
-                     painter = painterResource(id = R.drawable.search_icon),
-                     contentDescription = "Search", Modifier.size(50.dp)
-                 )*/
-                Text(
-                    item,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(3.dp)
-                        .align(Alignment.CenterVertically)
-                )
-
-            }
 
 
-        }
 
-
-    }
-
-
-}
-
-
-@Composable
-fun UserEachRow(
-    chatRow: ChatRow, nick: String
-
-) {
-    Card(modifier = Modifier.padding(vertical = 10.dp, horizontal = 15.dp)) {
-        Column(modifier = Modifier
-            .padding(vertical = 10.dp)
-            .padding(start = 10.dp)
-            .clickable {
-                //    navController.navigate("chat_screen/$userNick/${mesageRow.id}")
-            }
-        ) {
-
-            Row() {
-                Image(
-                    modifier = Modifier
-                        .size(50.dp)
-                        .border(BorderStroke(0.dp, Color.Transparent), CircleShape),
-                    painter = painterResource(id = R.drawable.eye), contentDescription = "Person"
-
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Column() {
-
-                    Text(
-                        text = chatRow.otherUser.toString(), modifier = Modifier
-                            .padding(vertical = 1.dp)
-                            .padding(start = 15.dp), fontSize = 23.sp
-
-                    )
-                    Text(
-                        text = chatRow.lastMessage,
-                        modifier = Modifier
-                            .padding(vertical = 2.dp)
-                            .padding(start = 15.dp),
-                        fontSize = 20.sp,
-                        maxLines = 1,
-                        color = Color.Gray
-                    )
-                }
-                Text(
-                    text = Timestamp(chatRow.date,0).toDate().toString(), modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 20.dp), textAlign = TextAlign.End, fontSize = 20.sp
-                )
-
-            }
-
-
-        }
-    }
-
-
-}
 
 @Composable
 fun SearchItem(
@@ -436,7 +422,7 @@ fun ChatRow(chatRow: ChatRow, nick: String,onClick: (chatId:String,otherUserNick
 
     Row(
         modifier = Modifier
-            .background(Color.LightGray,RoundedCornerShape(20.dp))
+            .background(Color.LightGray, RoundedCornerShape(20.dp))
             .clickable {
                 onClick(chatRow.chatRowId, chatRow.otherUser.nick)
             }

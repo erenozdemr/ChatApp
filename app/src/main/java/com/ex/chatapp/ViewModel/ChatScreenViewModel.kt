@@ -112,7 +112,7 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
 
     }
     fun getPhotoOfOther(otherUserNick:String){
-        database.child("users").child(otherUserNick).child("profileUrl").get().addOnSuccessListener {
+        database.child("users").child(otherUserNick).child("photoUrl").get().addOnSuccessListener {
             _profileUrl.value=it.getValue(String::class.java)
         }
         database.child("users").child(otherUserNick).child("status").addValueEventListener(object:ValueEventListener{

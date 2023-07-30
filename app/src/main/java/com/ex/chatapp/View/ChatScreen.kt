@@ -25,6 +25,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -147,7 +149,7 @@ fun ChatScreenGenerate(navController: NavController,
                    Box(
                        modifier = Modifier
                            .size(60.dp)
-                           .border(0.dp, Color.Black, CircleShape)
+
 
 
                    ) {
@@ -253,13 +255,15 @@ fun ChatScreenGenerate(navController: NavController,
                }
            }
 
-           Column(modifier = Modifier.fillMaxWidth().background(Color.DarkGray)) {
+           Column(modifier = Modifier
+               .fillMaxWidth()
+               .background(Color.LightGray)) {
                if(imageUri.value!=null && painter!=null){
                  Image(painter = painter!!, contentDescription = "message image", modifier = Modifier.size(height = 150.dp, width = 300.dp))
                }
                Row(modifier = Modifier.padding(bottom = 5.dp,top=5.dp)) {
                    OutlinedTextField(
-                       modifier = Modifier.weight(1f),
+                       modifier = Modifier.weight(1f), 
                        value = message, maxLines = 1,
                        onValueChange = { message = it },
                        placeholder = { Text(text = "message...") },
