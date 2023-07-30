@@ -1,5 +1,6 @@
 package com.ex.chatapp.ViewModel
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,6 +12,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.util.UUID
@@ -36,6 +38,7 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val database= FirebaseDatabase.getInstance().reference
+    private val storage=FirebaseStorage.getInstance().reference.child("images")
 
     init {
         database.child("chats").child(chatId).orderByChild("date").addChildEventListener(object:ChildEventListener{
@@ -47,7 +50,8 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
                 val message=Message(children.child("text").getValue(String::class.java)?:"",
                     children.child("sender").getValue(String::class.java)?:"",
                     children.key?:"",
-                    children.child("date").getValue(Long::class.java)?:16565
+                    children.child("date").getValue(Long::class.java)?:16565,
+                    children.child("imageUrl").getValue(String::class.java)
                 )
 
                 var temp=if(!_messagleList.value.isNullOrEmpty())_messagleList.value as MutableList? else mutableListOf()
@@ -89,7 +93,8 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
                     val message=Message(child.child("text").getValue(String::class.java)?:"",
                         child.child("sender").getValue(String::class.java)?:"",
                         child.key?:"",
-                        child.child("date").getValue(Long::class.java)?:16565
+                        child.child("date").getValue(Long::class.java)?:16565,
+                        child.child("imageUrl").getValue(String::class.java)
                     )
                     list.add(message)
                 }
@@ -107,7 +112,7 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
 
     }
     fun getPhotoOfOther(otherUserNick:String){
-        database.child("users").child(otherUserNick).child("profileUrl").get().addOnSuccessListener {
+        database.child("users").child(otherUserNick).child("photoUrl").get().addOnSuccessListener {
             _profileUrl.value=it.getValue(String::class.java)
         }
         database.child("users").child(otherUserNick).child("status").addValueEventListener(object:ValueEventListener{
@@ -122,18 +127,43 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
         })
 
     }
-    fun sendMessage(userNick:String,message:String,chatId: String){
+    fun sendMessage(userNick:String,message:String,chatId: String,imageUri:Uri?){
         _isLoading.value=true
         val id=UUID.randomUUID().toString()
-        val mes=Message(
-            text = message,
-        sender = userNick,
-        messageId = id,
-        date = com.google.firebase.Timestamp.now().seconds)
-        database.child("chats").child(chatId).child(id).setValue(mes).addOnSuccessListener {
-            _isLoading.value=false
-            loadChat(userNick,chatId)
+        if (imageUri!=null){
+            val imageID=UUID.randomUUID().toString()
+            storage.child(imageID).putFile(imageUri).addOnSuccessListener {
+                storage.child(imageID).downloadUrl.addOnSuccessListener {
+                    val mes=Message(
+                        text = message,
+                        sender = userNick,
+                        messageId = id,
+                        date = com.google.firebase.Timestamp.now().seconds,
+                        imageUrl = it.toString()
+                    )
+                    database.child("chats").child(chatId).child(id).setValue(mes).addOnSuccessListener {
+                        _isLoading.value=false
+                        loadChat(userNick,chatId)
 
+                    }
+                }.addOnFailureListener {
+                    _isLoading.value=false
+                }
+            }.addOnFailureListener {
+                _isLoading.value=false
+            }
+        }else{
+            val mes=Message(
+                text = message,
+                sender = userNick,
+                messageId = id,
+                date = com.google.firebase.Timestamp.now().seconds,
+            )
+            database.child("chats").child(chatId).child(id).setValue(mes).addOnSuccessListener {
+                _isLoading.value=false
+                loadChat(userNick,chatId)
+
+            }
         }
 
     }

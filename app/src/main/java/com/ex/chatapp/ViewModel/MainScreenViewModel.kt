@@ -1,6 +1,7 @@
 package com.ex.chatapp.ViewModel
 
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
 import com.google.type.Date
 import java.util.UUID
 
@@ -24,6 +26,7 @@ class MainScreenViewModel : ViewModel() {
     private val _chatList = MutableLiveData(listOf<ChatRow>())
     private val _goWithID = MutableLiveData("")
     private val _isError = MutableLiveData("")
+    private val _profile = MutableLiveData("no")
     private val _searchList = MutableLiveData(listOf<SimpleUser>())
     private val allNicks = MutableLiveData(listOf<SimpleUser>())
 
@@ -31,11 +34,13 @@ class MainScreenViewModel : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
     val goWithID: LiveData<String> = _goWithID
     val isError: LiveData<String> = _isError
+    val profile: LiveData<String> = _profile
     val searchList: LiveData<List<SimpleUser>> = _searchList
 
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
+    private val storage=FirebaseStorage.getInstance().reference.child("profileImages")
 
     fun searchNick(nick: String, userNick: String) {
         if (nick.isBlank()) {
@@ -123,9 +128,22 @@ class MainScreenViewModel : ViewModel() {
             auth.signOut()
         }
     }
+    fun loadProfilePhoto(uri: Uri,nick:String){
+        val id=UUID.randomUUID().toString()
+        storage.child(id).putFile(uri).addOnSuccessListener {
+            storage.child(id).downloadUrl.addOnSuccessListener {
+                database.child("users").child(nick).child("photoUrl").setValue(it.toString())
+                _profile.value=it.toString()
+            }
+        }
+
+    }
 
     fun loadMessages(nick: String) {
         _isLoading.value = true
+        database.child("users").child(nick).child("photoUrl").get().addOnSuccessListener {
+            _profile.value=it.getValue(String::class.java)
+        }
 
         database.child("users").child(nick).child("chats").addValueEventListener(
             object : ValueEventListener {
@@ -135,8 +153,8 @@ class MainScreenViewModel : ViewModel() {
 
                     for (child in children) {
                       val temp: SimpleChat =SimpleChat(
-                          child.child("id").getValue(String::class.java)!!,
-                      child.child("otherUser").getValue(String::class.java)!!
+                            child.child("id").getValue(String::class.java)!!,
+                            child.child("otherUser").getValue(String::class.java)!!
                       )
                         list.add(temp)
                     }
@@ -168,7 +186,7 @@ class MainScreenViewModel : ViewModel() {
                                           }
                                           val chatRow=ChatRow(
                                               otherUser = SimpleUser(listItem.otherUser, "no",false)
-                                              ,messageList.get(messageList.size-1).text,
+                                              ,if(messageList.get(messageList.size-1).text.isBlank())"-Fotoğraf-" else messageList.get(messageList.size-1).text,
                                               listItem.id,
                                               messageList.get(messageList.size-1).date,
                                               messageList.get(messageList.size-1).sender
