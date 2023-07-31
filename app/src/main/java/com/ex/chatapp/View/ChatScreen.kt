@@ -292,6 +292,7 @@ fun ChatScreenGenerate(navController: NavController,
                    ) {
                        if (message.isNotBlank() || imageUri.value!=null) {
                            viewModel.sendMessage(userNick, message, chatID,imageUri.value)
+                           viewModel.sendNotification(userNick,message,otherUserNick)
                            message = ""
                            imageUri.value=null
                            painter=null
@@ -307,6 +308,7 @@ fun ChatScreenGenerate(navController: NavController,
 
 
 }
+
 
 
 

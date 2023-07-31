@@ -17,6 +17,13 @@ class MainActivityViewModel:ViewModel() {
     fun saveNick(nick:String){
         _nick.value=nick
     }
+    fun saveToken(token:String){
+        if(_nick.value!=null){
+            database.child("users").child(_nick.value!!).child("token").setValue(token).addOnSuccessListener {
+
+            }
+        }
+    }
 
     fun setStatus(online:Boolean){
         if(auth.currentUser!=null && _nick.value!=null){
