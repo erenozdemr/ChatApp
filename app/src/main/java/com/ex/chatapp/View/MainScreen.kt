@@ -1,6 +1,7 @@
 package com.ex.chatapp.View
 
 
+import android.Manifest
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.widget.ImageButton
@@ -75,6 +76,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -147,6 +149,16 @@ fun MainScreenGenerate(
     var prevError by remember { mutableStateOf("") }
     var otherNick by remember { mutableStateOf("") }
     var dialogOpen by remember { mutableStateOf(false) }
+    val permissonLauncher= rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = {
+        }
+    )
+    LaunchedEffect(key1 = true){
+        permissonLauncher.launch(arrayOf(
+            Manifest.permission.POST_NOTIFICATIONS
+        ))
+    }
 
 
     val imageLoader = ImageLoader(LocalContext.current)
