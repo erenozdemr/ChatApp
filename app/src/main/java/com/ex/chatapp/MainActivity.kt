@@ -31,6 +31,8 @@ import com.ex.chatapp.View.VideoCallScreen
 import com.ex.chatapp.ui.theme.ChatAppTheme
 import com.ex.chatapp.ui.theme.loginText
 import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.FirebaseMessagingService
 
 
 lateinit var viewModel: MainActivityViewModel
@@ -47,6 +49,8 @@ class MainActivity : ComponentActivity() {
         FirebaseApp.initializeApp(applicationContext)
         viewModel=MainActivityViewModel()
         super.onCreate(savedInstanceState)
+
+
         setContent {
             ChatAppTheme {
 
@@ -74,6 +78,9 @@ class MainActivity : ComponentActivity() {
                         val nick=it.arguments?.getString("nick","noNick")
                         viewModel.saveNick(nick!!)
                         viewModel.setStatus(online = true)
+                        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+                            viewModel.saveToken(it)
+                        }
 
                         MainScreen(navController = navController, nick = nick!!, loginNavController =navController)
 
@@ -118,6 +125,8 @@ class MainActivity : ComponentActivity() {
 
             }
         }
+
+
     }
 
     override fun onStop() {

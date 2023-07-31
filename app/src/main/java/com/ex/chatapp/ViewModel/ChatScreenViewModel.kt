@@ -15,6 +15,17 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import org.json.JSONObject
+import java.io.IOException
 import java.util.UUID
 
 class ChatScreenViewModel(chatId: String):ViewModel() {
@@ -127,6 +138,62 @@ class ChatScreenViewModel(chatId: String):ViewModel() {
         })
 
     }
+
+    fun sendNotification(userNick: String,message:String,otherUserNick:String){
+       database.child("users").child(otherUserNick).child("token").get().addOnSuccessListener {
+           try {
+               val jsonObject=JSONObject()
+
+               val notificationJSONObject=JSONObject()
+               notificationJSONObject.put("title","${userNick} Sana Yeni Bir Mesaj Gönderdi")
+               notificationJSONObject.put("body",message)
+
+               val dataObject=JSONObject()
+
+               jsonObject.put("notification",notificationJSONObject)
+               jsonObject.put("data",dataObject)
+               jsonObject.put("to",it.getValue(String::class.java))
+
+               callApi(jsonObject)
+
+
+
+
+           }catch (e:Exception){
+                Log.e("Json error",e.localizedMessage)
+           }
+       }
+
+
+    }
+    private fun callApi(jsonObject:JSONObject){
+
+        database.child("utils").child("serverKey").get().addOnSuccessListener {
+            val key=it.getValue(String::class.java)
+            val json= "application/json; charset=utf-8".toMediaType()
+            val client=OkHttpClient()
+            var url="https://fcm.googleapis.com/fcm/send"
+            var body= jsonObject.toString().toRequestBody(json)
+            val request=Request.Builder()
+                .url(url)
+                .post(body)
+                .header("Authorization","Bearer $key")
+                .build()
+            client.newCall(request = request).enqueue(object:Callback{
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e("okthttp errır",e.localizedMessage)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+
+
+                }
+
+            })
+        }
+
+    }
+
     fun sendMessage(userNick:String,message:String,chatId: String,imageUri:Uri?){
         _isLoading.value=true
         val id=UUID.randomUUID().toString()
