@@ -66,8 +66,15 @@ class MainScreenViewModel : ViewModel() {
                 _isError.value = exception.localizedMessage
             }
         } else {
-            _searchList.value =
-                allNicks.value!!.filter { it.nick.contains(nick, ignoreCase = true) }
+            val temp=allNicks.value!!.filter { it.nick.contains(nick, ignoreCase = true) }
+           if(temp.size>5){
+               _searchList.value =temp.subList(0,5)
+           }else{
+               _searchList.value=temp
+           }
+
+
+
         }
     }
 
@@ -153,6 +160,7 @@ class MainScreenViewModel : ViewModel() {
 
                     for (child in children) {
                       val temp: SimpleChat =SimpleChat(
+
                             child.child("id").getValue(String::class.java)!!,
                             child.child("otherUser").getValue(String::class.java)!!
                       )
@@ -185,11 +193,13 @@ class MainScreenViewModel : ViewModel() {
                                               it.date
                                           }
                                           val chatRow=ChatRow(
+
                                               otherUser = SimpleUser(listItem.otherUser, "no",false)
                                               ,if(messageList.get(messageList.size-1).text.isBlank())"-Fotoğraf-" else messageList.get(messageList.size-1).text,
                                               listItem.id,
                                               messageList.get(messageList.size-1).date,
                                               messageList.get(messageList.size-1).sender
+
                                           )
                                             chatList.add(chatRow)
 
