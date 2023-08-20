@@ -17,5 +17,6 @@
 
 ✨ Coroutines: Showcasing the power of asynchronous programming integrated into Kotlin, Coroutines maintains the responsiveness of the application by efficiently managing network requests, database transactions, and long-running tasks.
 
-![chatapp_1]([https://raw.githubusercontent.com/HakanAkduman/Images/master/chatapp_1.png?token=GHSAT0AAAAAACEYD723ITPUDD7BUAQO64NQZG7QW3A])
-![chatapp_1]([https://raw.githubusercontent.com/HakanAkduman/Images/master/chatapp_2.png?token=GHSAT0AAAAAACEYD723Y7WD643SH5OXQHHAZG7QZRQ])
+![chatapp_1](https://github.com/erenozdemr/ChatApp/assets/118764511/16929ba9-a404-4944-8d5e-71a9cec26285)
+
+![chatapp_2](https://github.com/erenozdemr/ChatApp/assets/118764511/3a9e8b68-1990-4a37-85b3-499c34a8b53b)
